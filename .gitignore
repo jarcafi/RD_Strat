@@ -1,0 +1,9 @@
+.DS_Store
+
+# Large raw source dumps do not belong in the GitHub backup.
+data/fxcm_raw/
+data/vantage_raw/
+
+# High-file-count minute parquet stores stay local.
+data/fxcm_1m/
+data/vantage_1m/

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RD Strat Viewer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="toolbar">
+    <div class="title">RD Strat Viewer</div>
+    <div class="controls">
+      <label for="broker">Broker</label>
+      <select id="broker">
+        <option value="vantage">Vantage</option>
+        <option value="fxcm">FXCM</option>
+      </select>
+      <label for="tf">Timeframe</label>
+      <select id="tf">
+        <option value="5min">5m</option>
+        <option value="30min">30m</option>
+      </select>
+      <button id="reload">Reload</button>
+      <button id="settings-toggle" class="icon-button" title="Settings">⚙︎</button>
+    </div>
+    <div id="status" class="status">Ready</div>
+  </div>
+
+  <div id="settings-panel" class="settings-panel hidden">
+    <div class="settings-group">
+      <div class="settings-title">Zones</div>
+      <div class="settings-row">
+        <label class="field" title="Zonen generell ein-/ausblenden."><input type="checkbox" id="show-zones" checked /> Show zones</label>
+        <label class="field" title="Nur Demand-Zonen anzeigen."><input type="checkbox" id="show-demand" checked /> Demand</label>
+        <label class="field" title="Nur Supply-Zonen anzeigen."><input type="checkbox" id="show-supply" checked /> Supply</label>
+      </div>
+      <div class="settings-row">
+        <div class="field">
+          <label for="zone-min-run" title="Min. Folgekerzen in Impulsrichtung, um eine Zone zu erzeugen.">Min run</label>
+          <input type="number" id="zone-min-run" min="1" max="10" step="1" value="3" title="Min. Folgekerzen in Impulsrichtung, um eine Zone zu erzeugen." />
+        </div>
+        <div class="field">
+          <label for="zone-impulse-atr" title="Impulsstärke als Vielfaches des ATR (0 = aus).">Impulse (ATR)</label>
+          <input type="number" id="zone-impulse-atr" min="0" max="5" step="0.1" value="1.5" title="Impulsstärke als Vielfaches des ATR (0 = aus)." />
+        </div>
+        <div class="field">
+          <label for="zone-min-gap" title="Min. Abstand (Bars) zwischen Zonen gleicher Art. Wirkt beim Neugenerieren.">Min gap</label>
+          <input type="number" id="zone-min-gap" min="0" max="50" step="1" value="3" title="Min. Abstand (Bars) zwischen Zonen gleicher Art. Wirkt beim Neugenerieren." />
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-title">Liquidity</div>
+      <div class="settings-row">
+        <label class="field" title="Liquidity-Linien ein-/ausblenden."><input type="checkbox" id="show-liquidity" checked /> Show liquidity</label>
+        <label class="field" title="Nur Liquidity mit Break of Structure (BoS) anzeigen."><input type="checkbox" id="liq-bos-only" checked /> BoS only</label>
+      </div>
+      <div class="settings-row">
+        <div class="field">
+          <label for="liq-swing-window" title="Bestätigungsfenster: Swing gilt nur, wenn der Rücklauf innerhalb dieser Kerzen erfolgt.">Swing window</label>
+          <input type="number" id="liq-swing-window" min="1" max="30" step="1" value="6" title="Bestätigungsfenster: Swing gilt nur, wenn der Rücklauf innerhalb dieser Kerzen erfolgt." />
+        </div>
+        <div class="field">
+          <label for="liq-bos-window" title="BoS muss innerhalb dieser Kerzenzahl nach der Liquidity passieren.">BoS window</label>
+          <input type="number" id="liq-bos-window" min="1" max="50" step="1" value="6" title="BoS muss innerhalb dieser Kerzenzahl nach der Liquidity passieren." />
+        </div>
+      </div>
+      <div class="settings-row">
+        <div class="field">
+          <label for="liq-min-candles" title="Min. Kerzen, die eine Liquidity-Gruppe bilden müssen.">Min candles</label>
+          <input type="number" id="liq-min-candles" min="1" max="10" step="1" value="2" title="Min. Kerzen, die eine Liquidity-Gruppe bilden müssen." />
+        </div>
+        <div class="field">
+          <label for="liq-cluster-pips" title="Max. Abstand (pips), damit Kerzen als eine Liquidity-Gruppe zählen.">Cluster pips</label>
+          <input type="number" id="liq-cluster-pips" min="0.5" max="10" step="0.5" value="2" title="Max. Abstand (pips), damit Kerzen als eine Liquidity-Gruppe zählen." />
+        </div>
+      </div>
+      <div class="settings-row">
+        <div class="field">
+          <label for="liq-min-dip" title="Min. Dip/Hoch (pips) für einen gültigen Swing-Pivot.">Min dip (pips)</label>
+          <input type="number" id="liq-min-dip" min="0" max="50" step="1" value="3" title="Min. Dip/Hoch (pips) für einen gültigen Swing-Pivot." />
+        </div>
+        <div class="field">
+          <label for="liq-max-pips" title="Max. Distanz (pips) der Liquidity zur Zone.">Distance (pips)</label>
+          <input type="number" id="liq-max-pips" min="1" max="50" step="1" value="10" title="Max. Distanz (pips) der Liquidity zur Zone." />
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-title">Appearance</div>
+      <div class="settings-row">
+        <label for="zones-opacity" title="Transparenz der Zonen.">Opacity <span id="opacity-value">0.30</span></label>
+        <input type="range" id="zones-opacity" min="0.1" max="0.7" step="0.05" value="0.3" title="Transparenz der Zonen." />
+      </div>
+      <div class="settings-row">
+        <div class="field">
+          <label for="demand-color" title="Farbe für Demand-Zonen.">Demand</label>
+          <input type="color" id="demand-color" value="#22c55e" title="Farbe für Demand-Zonen." />
+        </div>
+        <div class="field">
+          <label for="supply-color" title="Farbe für Supply-Zonen.">Supply</label>
+          <input type="color" id="supply-color" value="#ef4444" title="Farbe für Supply-Zonen." />
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-title">Trades</div>
+      <div class="settings-row">
+        <label class="field" title="Trades ein-/ausblenden."><input type="checkbox" id="show-trades" checked /> Show trades</label>
+        <label class="field" title="Nur Long-Trades anzeigen."><input type="checkbox" id="show-long-trades" checked /> Longs</label>
+        <label class="field" title="Nur Short-Trades anzeigen."><input type="checkbox" id="show-short-trades" checked /> Shorts</label>
+      </div>
+      <div class="settings-row">
+        <label class="field" title="Primary Entry aktivieren (Close außerhalb der Zone nach Tap)."><input type="checkbox" id="entry-primary" checked /> Primary</label>
+        <label class="field" title="Break-of-Candle Entry aktivieren (Break der Vor-Kerze nach Tap)."><input type="checkbox" id="entry-break" /> Break</label>
+      </div>
+      <div class="settings-row">
+        <label class="field" title="Stop-Loss-Regel anwenden (5m: Wick, 30m: +1 Pip)."><input type="checkbox" id="trade-use-sl" checked /> Use SL</label>
+        <label class="field" title="Take-Profit anhand des Risiko-Abstands (R-Multiple) verwenden."><input type="checkbox" id="trade-use-tp" checked /> Use TP</label>
+        <label class="field" title="RR automatisch aus der SL-Größe ableiten (5m Rules)."><input type="checkbox" id="trade-auto-rr" checked /> Auto RR</label>
+        <label class="field" title="Break-even aktivieren gemäß SL-Band Regeln."><input type="checkbox" id="trade-use-be" checked /> Use BE</label>
+        <label class="field" title="Falls SL/TP nicht getroffen, am Zonenende schließen."><input type="checkbox" id="trade-close-end" checked /> Close at zone end</label>
+      </div>
+      <div class="settings-row">
+        <div class="field">
+          <label for="trade-rr" title="TP = Risiko * R. Wird genutzt wenn Auto RR aus ist.">TP (R)</label>
+          <input type="number" id="trade-rr" min="0.5" max="10" step="0.1" value="1.5" title="TP = Risiko * R. Wird genutzt wenn Auto RR aus ist." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="backtest-panel" class="backtest-panel hidden">
+    <div class="backtest-title">Backtest</div>
+    <div class="backtest-row">
+      <label class="field" title="Stats auf sichtbaren Bereich beschränken."><input type="checkbox" id="bt-visible" checked /> Visible range</label>
+    </div>
+    <div class="backtest-row">
+      <label class="field" title="Backtest auf einen Datumsbereich begrenzen."><input type="checkbox" id="bt-use-range" checked /> Date range</label>
+    </div>
+    <div class="backtest-row">
+      <div class="field">
+        <label for="bt-start" title="Startzeit (lokal).">Start</label>
+        <input type="datetime-local" id="bt-start" title="Startzeit (lokal)." />
+      </div>
+      <div class="field">
+        <label for="bt-end" title="Endzeit (lokal).">End</label>
+        <input type="datetime-local" id="bt-end" title="Endzeit (lokal)." />
+      </div>
+    </div>
+    <div class="backtest-grid">
+      <div>Trades <span id="bt-trades">0</span></div>
+      <div>Wins <span id="bt-wins">0</span></div>
+      <div>Losses <span id="bt-losses">0</span></div>
+      <div>Win % <span id="bt-winrate">0%</span></div>
+      <div>Avg R <span id="bt-avg-r">0.00</span></div>
+      <div>Total R <span id="bt-total-r">0.00</span></div>
+      <div>Longs <span id="bt-longs">0</span></div>
+      <div>Shorts <span id="bt-shorts">0</span></div>
+      <div>Primary <span id="bt-primary">0</span></div>
+      <div>Break <span id="bt-break">0</span></div>
+      <div>SL hits <span id="bt-sl">0</span></div>
+      <div>Closes <span id="bt-close">0</span></div>
+    </div>
+    <div id="bt-trade-details" class="backtest-details hidden">
+      <div class="backtest-details-title">Trade</div>
+      <div id="bt-trade-details-body">Click a trade marker to inspect.</div>
+    </div>
+  </div>
+
+  <div id="chart"></div>
+
+  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

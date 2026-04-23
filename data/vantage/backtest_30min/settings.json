@@ -1,0 +1,21 @@
+{
+  "zone_min_run": 3,
+  "zone_impulse_atr": 1.5,
+  "liq_bos_only": true,
+  "liq_swing_window": 6,
+  "liq_bos_window": 6,
+  "liq_min_candles": 2,
+  "liq_cluster_pips": 2.0,
+  "liq_max_pips": 10.0,
+  "liq_min_dip_pips": 3.0,
+  "entry_primary": true,
+  "entry_break": false,
+  "trade_use_sl": true,
+  "trade_use_tp": true,
+  "trade_auto_rr": true,
+  "trade_use_be": true,
+  "trade_close_end": true,
+  "trade_rr": 1.5,
+  "include_longs": true,
+  "include_shorts": true
+}
