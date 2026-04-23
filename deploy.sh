@@ -7,8 +7,6 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-EXPECTED_REPO_NAME="RD_Strat"
-
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo "${RED}❌ Not inside a git repository.${NC}" >&2
   exit 1
@@ -25,13 +23,8 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMMIT_MSG="$*"
 
-if [ "$REPO_NAME" != "$EXPECTED_REPO_NAME" ]; then
-  echo "${RED}❌ Safety stop: expected repo '${EXPECTED_REPO_NAME}', got '${REPO_NAME}'.${NC}" >&2
-  exit 1
-fi
-
 if [ "$SCRIPT_DIR" != "$REPO_ROOT" ]; then
-  echo "${RED}❌ Safety stop: script must run from ${EXPECTED_REPO_NAME} root.${NC}" >&2
+  echo "${RED}❌ Safety stop: script must run from the repository root.${NC}" >&2
   exit 1
 fi
 
